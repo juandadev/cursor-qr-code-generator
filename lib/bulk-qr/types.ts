@@ -45,7 +45,16 @@ export interface CardConfig {
   qrStyle: QrStyle
   eventName: string
   locale: CardLocale
+  /** Edge length of the centered brand logo on the voucher front, in CSS px. */
+  logoSize: number
 }
+
+export const LOGO_SIZE_RANGE = {
+  min: 24,
+  max: 120,
+  step: 4,
+  default: 56,
+} as const
 
 /**
  * All color roles used inside a printed card. Both sides and the embedded

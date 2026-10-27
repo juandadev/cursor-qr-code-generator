@@ -5,11 +5,12 @@ import { Layers, ListPlus, Sparkles } from 'lucide-react'
 import { useRedeemSources } from '@/hooks/use-redeem-sources'
 import { useVoucherMenu } from '@/hooks/use-voucher-menu'
 import { getCardMode, getSharedFace, pluralizeUnit } from '@/lib/bulk-qr/modes'
-import type {
-  CardConfig,
-  CardFace,
-  CardItem,
-  CardMode,
+import {
+  LOGO_SIZE_RANGE,
+  type CardConfig,
+  type CardFace,
+  type CardItem,
+  type CardMode,
 } from '@/lib/bulk-qr/types'
 import { CardCustomizer } from './card-customizer'
 import { CardPreview } from './card-preview'
@@ -26,6 +27,7 @@ const DEFAULT_CONFIG: CardConfig = {
   qrStyle: 'dots',
   eventName: '',
   locale: 'en',
+  logoSize: LOGO_SIZE_RANGE.default,
 }
 
 export function BulkQrGenerator() {
@@ -93,6 +95,7 @@ export function BulkQrGenerator() {
               config={config}
               onChange={setConfig}
               onEventNameFocus={() => setPreviewFace('back')}
+              onLogoSizeFocus={() => setPreviewFace('front')}
             />
           </SidebarSection>
 

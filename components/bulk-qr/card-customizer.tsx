@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { LogoSizeField } from './logo-size-field'
 
 interface CardCustomizerProps {
   config: CardConfig
@@ -22,12 +23,15 @@ interface CardCustomizerProps {
    * event name appears.
    */
   onEventNameFocus?: () => void
+  /** Fired when the logo-size slider is used, so the preview can show the front. */
+  onLogoSizeFocus?: () => void
 }
 
 export function CardCustomizer({
   config,
   onChange,
   onEventNameFocus,
+  onLogoSizeFocus,
 }: CardCustomizerProps) {
   const mode = getCardMode(config.mode)
 
@@ -96,6 +100,14 @@ export function CardCustomizer({
           </ToggleGroupItem>
         </ToggleGroup>
       </Field>
+
+      {config.mode === 'voucher' ? (
+        <LogoSizeField
+          value={config.logoSize}
+          onChange={(logoSize) => onChange({ ...config, logoSize })}
+          onFocus={onLogoSizeFocus}
+        />
+      ) : null}
 
       <Field>
         <FieldLabel htmlFor="locale">Language</FieldLabel>

@@ -23,8 +23,15 @@ export const VoucherCardFront = forwardRef<
       tokens={tokens}
       innerClassName="items-center justify-center"
     >
-      <span style={{ color: tokens.foreground }}>
-        <BrandMark brand={brand} className="h-14 w-14" />
+      <span
+        className="flex"
+        style={{
+          color: tokens.foreground,
+          width: config.logoSize,
+          height: config.logoSize,
+        }}
+      >
+        <BrandMark brand={brand} className="h-full w-full" />
       </span>
     </CardFrame>
   )
