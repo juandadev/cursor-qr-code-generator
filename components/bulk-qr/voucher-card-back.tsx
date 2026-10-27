@@ -5,6 +5,9 @@ import { getCardMode, getCardTokens } from '@/lib/bulk-qr/modes'
 import type { CardConfig, VoucherCard } from '@/lib/bulk-qr/types'
 import { BrandMark } from './brand-mark'
 import { CardFrame } from './card-frame'
+import { QrCode } from './qr-code'
+
+const PROMO_URL = 'https://raycast.com/new'
 
 interface VoucherCardBackProps {
   card: VoucherCard
@@ -50,16 +53,36 @@ export const VoucherCardBack = forwardRef<HTMLDivElement, VoucherCardBackProps>(
           </span>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <span
-            className="text-[8px] font-medium"
-            style={{ color: tokens.mutedForeground }}
-          >
-            {copy.lead}
-          </span>
-          <p className="line-clamp-2 text-balance text-[20px] font-semibold leading-[1.1]">
-            {copy.formatItem(card.itemName)}
-          </p>
+        <div className="flex items-end justify-between gap-3">
+          <div className="flex min-w-0 flex-col gap-1">
+            <span
+              className="text-[8px] font-medium"
+              style={{ color: tokens.mutedForeground }}
+            >
+              {copy.lead}
+            </span>
+            <p className="line-clamp-2 text-balance text-[20px] font-semibold leading-[1.1]">
+              {copy.formatItem(card.itemName)}
+            </p>
+          </div>
+          <div className="flex w-14 shrink-0 flex-col items-center gap-1">
+            <QrCode
+              value={PROMO_URL}
+              size={56}
+              style="square"
+              tokens={tokens}
+              showLogo={false}
+            />
+            <span
+              className="text-center text-[5.5px] font-medium leading-tight tracking-normal"
+              style={{ color: tokens.mutedForeground }}
+            >
+              Find out more about Raycast V2
+              <span className="block" style={{ color: tokens.foreground }}>
+                raycast.com/new
+              </span>
+            </span>
+          </div>
         </div>
       </CardFrame>
     )

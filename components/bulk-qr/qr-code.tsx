@@ -9,6 +9,8 @@ interface QrCodeProps {
   size: number
   style: QrStyle
   tokens: CardColorTokens
+  /** Embed the Cursor mark in the center. Defaults to true. */
+  showLogo?: boolean
   className?: string
 }
 
@@ -59,7 +61,14 @@ function getStyleVariant(style: QrStyle): QrStyleVariant {
   return { dots: 'square', cornersSquare: 'square', cornersDot: 'square' }
 }
 
-export function QrCode({ value, size, style, tokens, className }: QrCodeProps) {
+export function QrCode({
+  value,
+  size,
+  style,
+  tokens,
+  showLogo = true,
+  className,
+}: QrCodeProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -99,7 +108,7 @@ export function QrCode({ value, size, style, tokens, className }: QrCodeProps) {
           type: variant.cornersDot,
           color: fg,
         },
-        image: buildLogoDataUrl(tokens),
+        image: showLogo ? buildLogoDataUrl(tokens) : undefined,
         imageOptions: {
           hideBackgroundDots: true,
           imageSize: 0.26,
@@ -133,7 +142,7 @@ export function QrCode({ value, size, style, tokens, className }: QrCodeProps) {
     return () => {
       cancelled = true
     }
-  }, [value, style, tokens])
+  }, [value, style, tokens, showLogo])
 
   return (
     <div
