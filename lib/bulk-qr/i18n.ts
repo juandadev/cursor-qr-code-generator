@@ -1,13 +1,13 @@
 export type CardLocale = 'en' | 'es'
 
 /**
- * All strings printed on the card. Kept here so the card components stay
+ * All strings printed on the cards. Kept here so the card components stay
  * presentational and translations live in one strongly-typed source.
  *
  * Spanish copy targets es-MX and intentionally leaves proper nouns like
  * "Team" (the name of a Cursor plan) untranslated.
  */
-export interface CardCopy {
+export interface RedeemCopy {
   eyebrow: string
   headline: string
   steps: {
@@ -17,7 +17,12 @@ export interface CardCopy {
   }
 }
 
-const COPY: Record<CardLocale, CardCopy> = {
+export interface VoucherCopy {
+  lead: string
+  formatItem: (itemName: string) => string
+}
+
+const REDEEM_COPY: Record<CardLocale, RedeemCopy> = {
   en: {
     eyebrow: 'Cursor credits',
     headline: 'Scan to redeem',
@@ -38,8 +43,31 @@ const COPY: Record<CardLocale, CardCopy> = {
   },
 }
 
-export function getCardCopy(locale: CardLocale): CardCopy {
-  return COPY[locale]
+// Spanish skips the article: item genders are unknown ("un espresso", "una horchata").
+const VOUCHER_COPY: Record<CardLocale, VoucherCopy> = {
+  en: {
+    lead: 'This is valid for',
+    formatItem: (itemName) => `${indefiniteArticle(itemName)} ${itemName}.`,
+  },
+  es: {
+    lead: 'Este cupón es válido por',
+    formatItem: (itemName) => `${itemName}.`,
+  },
+}
+
+export function getRedeemCopy(locale: CardLocale): RedeemCopy {
+  return REDEEM_COPY[locale]
+}
+
+export function getVoucherCopy(locale: CardLocale): VoucherCopy {
+  return VOUCHER_COPY[locale]
+}
+
+function indefiniteArticle(word: string): 'a' | 'an' {
+  const lower = word.trim().toLowerCase()
+  if (/^(hour|honest|honou?r|heir)/.test(lower)) return 'an'
+  if (/^(uni|use|usu|eu|one|once)/.test(lower)) return 'a'
+  return /^[aeiou]/.test(lower) ? 'an' : 'a'
 }
 
 export const CARD_LOCALE_OPTIONS: ReadonlyArray<{

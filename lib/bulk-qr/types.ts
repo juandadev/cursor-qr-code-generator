@@ -2,15 +2,45 @@ import type { CardLocale } from './i18n'
 
 export type CardTheme = 'light' | 'dark'
 export type QrStyle = 'square' | 'dots'
+export type CardFace = 'front' | 'back'
+
+/**
+ * - `redeem`: one card per redeem URL. The front is unique (QR), the back is shared.
+ * - `voucher`: one card per menu unit. The front is shared (logo), the back is unique (item).
+ */
+export type CardMode = 'redeem' | 'voucher'
+
+export type BrandId = 'cursor' | 'raycast'
 
 export interface RedeemCode {
+  kind: 'redeem'
   id: string
   url: string
   /** The short code after the last slash, if any. Used as a file name hint. */
   code: string
 }
 
+/** A single editable row in the voucher menu. */
+export interface MenuItem {
+  id: string
+  name: string
+  quantity: number
+}
+
+/** One printable voucher, expanded from a {@link MenuItem}. */
+export interface VoucherCard {
+  kind: 'voucher'
+  id: string
+  itemName: string
+  /** 1-based position within its menu item (e.g. 3 of 5 espressos). */
+  serial: number
+  itemTotal: number
+}
+
+export type CardItem = RedeemCode | VoucherCard
+
 export interface CardConfig {
+  mode: CardMode
   theme: CardTheme
   qrStyle: QrStyle
   eventName: string
@@ -19,7 +49,7 @@ export interface CardConfig {
 
 /**
  * All color roles used inside a printed card. Both sides and the embedded
- * QR all derive their colors from here, so the theme is edited in one place.
+ * QR all derive their colors from here, so a brand theme is edited in one place.
  */
 export interface CardColorTokens {
   /** Card outer background (outside the inner container). */
@@ -28,34 +58,12 @@ export interface CardColorTokens {
   container: string
   /** Inner container hairline border. */
   border: string
-  /** Main text, Cursor logo/wordmark, and QR dots. */
+  /** Main text, brand marks, and QR dots. */
   foreground: string
   /** Secondary labels, event/city name, divider caps. */
   mutedForeground: string
-  /** Accent color for "Scan to redeem" and the raw redeem link. */
+  /** Brand accent for headlines, links, and highlights. */
   accent: string
-}
-
-const DARK_CARD_TOKENS: CardColorTokens = {
-  background: '#15120B',
-  container: '#1C1B16',
-  border: '#33322D',
-  foreground: '#FDFDFB',
-  mutedForeground: '#969590',
-  accent: '#D95910',
-}
-
-const LIGHT_CARD_TOKENS: CardColorTokens = {
-  background: '#FAFAF9',
-  container: '#F5F5F4',
-  border: '#D6D3D1',
-  foreground: '#0C0A09',
-  mutedForeground: '#79716B',
-  accent: '#CE530D',
-}
-
-export function getCardTokens(theme: CardTheme): CardColorTokens {
-  return theme === 'dark' ? DARK_CARD_TOKENS : LIGHT_CARD_TOKENS
 }
 
 /** Physical card dimensions, in CSS pixels. This is the exact size used for export. */

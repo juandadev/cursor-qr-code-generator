@@ -1,18 +1,14 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import {
-  getCardTokens,
-  type CardTheme,
-  type QrStyle,
-} from '@/lib/bulk-qr/types'
+import type { CardColorTokens, QrStyle } from '@/lib/bulk-qr/types'
 import { cn } from '@/lib/utils'
 
 interface QrCodeProps {
   value: string
   size: number
   style: QrStyle
-  theme: CardTheme
+  tokens: CardColorTokens
   className?: string
 }
 
@@ -31,8 +27,7 @@ const RENDER_SIZE = 1024
  * with colors inverted from the QR's foreground so it reads against the
  * "hidden background dots" clear area.
  */
-function buildLogoDataUrl(theme: CardTheme): string {
-  const tokens = getCardTokens(theme)
+function buildLogoDataUrl(tokens: CardColorTokens): string {
   // Circle fill matches the card's inner container so the logo badge blends
   // seamlessly into the cleared QR area; the mark itself uses the foreground.
   const svg = `
@@ -64,7 +59,7 @@ function getStyleVariant(style: QrStyle): QrStyleVariant {
   return { dots: 'square', cornersSquare: 'square', cornersDot: 'square' }
 }
 
-export function QrCode({ value, size, style, theme, className }: QrCodeProps) {
+export function QrCode({ value, size, style, tokens, className }: QrCodeProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -76,7 +71,6 @@ export function QrCode({ value, size, style, theme, className }: QrCodeProps) {
       const { default: QRCodeStyling } = await import('qr-code-styling')
       if (cancelled || !host) return
 
-      const tokens = getCardTokens(theme)
       const fg = tokens.foreground
       const variant = getStyleVariant(style)
 
@@ -105,7 +99,7 @@ export function QrCode({ value, size, style, theme, className }: QrCodeProps) {
           type: variant.cornersDot,
           color: fg,
         },
-        image: buildLogoDataUrl(theme),
+        image: buildLogoDataUrl(tokens),
         imageOptions: {
           hideBackgroundDots: true,
           imageSize: 0.26,
@@ -139,7 +133,7 @@ export function QrCode({ value, size, style, theme, className }: QrCodeProps) {
     return () => {
       cancelled = true
     }
-  }, [value, style, theme])
+  }, [value, style, tokens])
 
   return (
     <div

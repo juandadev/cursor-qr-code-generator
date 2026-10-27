@@ -1,17 +1,16 @@
 'use client'
 
 import { forwardRef, useImperativeHandle, useRef } from 'react'
-import { QrCardBack } from './qr-card-back'
-import { QrCardFront } from './qr-card-front'
-import type { CardConfig, RedeemCode } from '@/lib/bulk-qr/types'
+import { SharedCardFace, VariableCardFace } from './card-face'
+import type { CardConfig, CardItem } from '@/lib/bulk-qr/types'
 
 export interface ExportStageHandle {
-  getFrontNode: (codeId: string) => HTMLElement | null
-  getBackNode: () => HTMLElement | null
+  getVariableNode: (cardId: string) => HTMLElement | null
+  getSharedNode: () => HTMLElement | null
 }
 
 interface ExportStageProps {
-  codes: RedeemCode[]
+  cards: CardItem[]
   config: CardConfig
 }
 
@@ -21,15 +20,16 @@ interface ExportStageProps {
  * (instead of `display: none`) so layout and canvases actually paint.
  */
 export const ExportStage = forwardRef<ExportStageHandle, ExportStageProps>(
-  function ExportStage({ codes, config }, ref) {
-    const frontRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
-    const backRef = useRef<HTMLDivElement | null>(null)
+  function ExportStage({ cards, config }, ref) {
+    const variableRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
+    const sharedRef = useRef<HTMLDivElement | null>(null)
 
     useImperativeHandle(
       ref,
       () => ({
-        getFrontNode: (codeId: string) => frontRefs.current.get(codeId) ?? null,
-        getBackNode: () => backRef.current,
+        getVariableNode: (cardId: string) =>
+          variableRefs.current.get(cardId) ?? null,
+        getSharedNode: () => sharedRef.current,
       }),
       [],
     )
@@ -45,17 +45,17 @@ export const ExportStage = forwardRef<ExportStageHandle, ExportStageProps>(
           opacity: 0,
         }}
       >
-        {codes.map((code) => (
-          <QrCardFront
-            key={code.id}
-            code={code}
+        {cards.map((card) => (
+          <VariableCardFace
+            key={card.id}
+            card={card}
             config={config}
             ref={(node) => {
-              frontRefs.current.set(code.id, node)
+              variableRefs.current.set(card.id, node)
             }}
           />
         ))}
-        <QrCardBack ref={backRef} config={config} />
+        <SharedCardFace ref={sharedRef} config={config} />
       </div>
     )
   },

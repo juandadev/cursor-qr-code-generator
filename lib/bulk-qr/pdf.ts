@@ -184,15 +184,15 @@ export function countPdfPages(totalCards: number, layout: PdfLayout): number {
 }
 
 export interface GeneratePdfInput {
-  /** One PNG blob per card front, in the order they should appear. */
-  fronts: Blob[]
+  /** One PNG blob per card for the face that varies, in print order. */
+  variable: Blob[]
   /**
-   * Optional single back-card PNG. When provided, one extra page is appended
-   * at the end with the back tiled across every grid slot — enough copies to
-   * cut and pair with the fronts. All backs are identical so we only need a
-   * single PNG and a single page, regardless of how many fronts were printed.
+   * Optional PNG of the face every card shares. When provided, one extra page
+   * is appended with it tiled across every grid slot — enough copies to cut
+   * and pair with the variable faces. Since it is identical for every card we
+   * only need a single PNG and a single page.
    */
-  back?: Blob
+  shared?: Blob
   layout: PdfLayout
   /** Optional title written to the PDF's metadata. */
   documentTitle?: string
@@ -205,8 +205,8 @@ export interface GeneratePdfInput {
  * the cards on paper match the user's configured physical size exactly.
  */
 export async function generateCardsPdf({
-  fronts,
-  back,
+  variable,
+  shared,
   layout,
   documentTitle,
   onProgress,
@@ -216,7 +216,7 @@ export async function generateCardsPdf({
       'No cards fit on the page. Reduce margins, gaps, or card width.',
     )
   }
-  if (fronts.length === 0) {
+  if (variable.length === 0) {
     throw new Error('There are no cards to export.')
   }
 
@@ -239,20 +239,20 @@ export async function generateCardsPdf({
   if (documentTitle) {
     doc.setDocumentProperties({
       title: documentTitle,
-      creator: 'Cursor Bulk QR Generator',
+      creator: 'Bulk Card Generator',
     })
   }
 
   // jsPDF wants data URLs for addImage. Convert blobs up front in parallel so
   // the hot loop below only does synchronous drawing work.
-  const [dataUrls, backDataUrl] = await Promise.all([
-    Promise.all(fronts.map(blobToDataUrl)),
-    back ? blobToDataUrl(back) : Promise.resolve<string | null>(null),
+  const [dataUrls, sharedDataUrl] = await Promise.all([
+    Promise.all(variable.map(blobToDataUrl)),
+    shared ? blobToDataUrl(shared) : Promise.resolve<string | null>(null),
   ])
 
-  // Total work units for progress reporting: every front + every back slot
-  // drawn on the final page (if a back is supplied).
-  const totalWork = dataUrls.length + (backDataUrl ? layout.perPage : 0)
+  // Total work units for progress reporting: every variable card + every
+  // shared slot drawn on the final page (if a shared face is supplied).
+  const totalWork = dataUrls.length + (sharedDataUrl ? layout.perPage : 0)
   let drawn = 0
   let pageIndex = 0
 
@@ -283,8 +283,8 @@ export async function generateCardsPdf({
     }
   }
 
-  // Single extra page with the shared back card tiled across every grid slot.
-  if (backDataUrl && layout.perPage > 0) {
+  // Single extra page with the shared face tiled across every grid slot.
+  if (sharedDataUrl && layout.perPage > 0) {
     doc.addPage([layout.pageWidthMm, layout.pageHeightMm], orientation)
     for (let idx = 0; idx < layout.perPage; idx += 1) {
       const col = idx % layout.cols
@@ -292,7 +292,7 @@ export async function generateCardsPdf({
       const x = layout.offsetXMm + col * (layout.cardWidthMm + layout.gapMm)
       const y = layout.offsetYMm + row * (layout.cardHeightMm + layout.gapMm)
       doc.addImage(
-        backDataUrl,
+        sharedDataUrl,
         'PNG',
         x,
         y,

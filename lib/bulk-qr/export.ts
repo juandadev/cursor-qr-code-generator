@@ -37,12 +37,25 @@ export interface CardAsset {
   blob: Blob
 }
 
-export async function zipCards(assets: CardAsset[]): Promise<Blob> {
+export interface ZipCardsInput {
+  /** Folder holding one PNG per card (the face that varies). */
+  folderName: string
+  assets: CardAsset[]
+  /** The face shared by every card, stored once at the ZIP root. */
+  shared: CardAsset
+}
+
+export async function zipCards({
+  folderName,
+  assets,
+  shared,
+}: ZipCardsInput): Promise<Blob> {
   const zip = new JSZip()
-  const fronts = zip.folder('fronts')
+  const folder = zip.folder(folderName)
   for (const asset of assets) {
-    fronts?.file(asset.fileName, asset.blob)
+    folder?.file(asset.fileName, asset.blob)
   }
+  zip.file(shared.fileName, shared.blob)
   return zip.generateAsync({ type: 'blob' })
 }
 

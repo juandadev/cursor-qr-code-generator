@@ -10,9 +10,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Bulk QR Generator · Cursor Ambassadors',
+  title: 'Bulk Card Generator',
   description:
-    'Upload a CSV or paste redeem links manually, then export print-ready QR cards for Cursor meetups.',
+    'Generate print-ready event cards in bulk — QR redeem links or menu vouchers with tracked inventory — and export them as PNGs or PDF.',
   generator: 'v0.app',
   icons: {
     icon: [

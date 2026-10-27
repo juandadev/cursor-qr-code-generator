@@ -11,91 +11,82 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { QrCardFront } from './qr-card-front'
-import { QrCardBack } from './qr-card-back'
+import { SharedCardFace, VariableCardFace } from './card-face'
+import { describeCard } from '@/lib/bulk-qr/cards'
+import { getCardMode } from '@/lib/bulk-qr/modes'
 import {
   CARD_HEIGHT,
   CARD_WIDTH,
   PREVIEW_SCALE,
   type CardConfig,
-  type RedeemCode,
+  type CardFace,
+  type CardItem,
 } from '@/lib/bulk-qr/types'
 
-export type CardFace = 'front' | 'back'
-
 interface CardPreviewProps {
-  codes: RedeemCode[]
+  cards: CardItem[]
   config: CardConfig
-  /**
-   * Controlled face value. When provided together with {@link onFaceChange},
-   * the parent fully owns which side is visible.
-   */
-  face?: CardFace
-  onFaceChange?: (face: CardFace) => void
+  face: CardFace
+  onFaceChange: (face: CardFace) => void
 }
 
 export function CardPreview({
-  codes,
+  cards,
   config,
-  face: faceProp,
+  face,
   onFaceChange,
 }: CardPreviewProps) {
   const [index, setIndex] = useState(0)
-  const [internalFace, setInternalFace] = useState<CardFace>('front')
-  const face = faceProp ?? internalFace
-  const setFace = (next: CardFace) => {
-    if (faceProp === undefined) setInternalFace(next)
-    onFaceChange?.(next)
-  }
+  const mode = getCardMode(config.mode)
 
-  const currentIndex = Math.min(index, Math.max(0, codes.length - 1))
-  const currentCode = codes[currentIndex]
+  const currentIndex = Math.min(index, Math.max(0, cards.length - 1))
+  const currentCard = cards[currentIndex]
+  const showsVariableFace = face === mode.variableFace
 
-  if (codes.length === 0) {
+  if (!currentCard) {
     return (
       <Empty className="h-full min-h-[360px] border border-dashed">
         <EmptyHeader>
-          <EmptyTitle>Add codes to preview</EmptyTitle>
-          <EmptyDescription>
-            Upload a CSV or paste links manually to see each card render here
-            with your styling applied.
-          </EmptyDescription>
+          <EmptyTitle>{mode.emptyState.title}</EmptyTitle>
+          <EmptyDescription>{mode.emptyState.description}</EmptyDescription>
         </EmptyHeader>
       </Empty>
     )
   }
+
+  const summary = describeCard(currentCard)
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs
           value={face}
-          onValueChange={(value) => setFace(value as CardFace)}
+          onValueChange={(value) => onFaceChange(value as CardFace)}
         >
           <TabsList>
             <TabsTrigger value="front">Front</TabsTrigger>
             <TabsTrigger value="back">Back</TabsTrigger>
           </TabsList>
         </Tabs>
-        {face === 'front' && codes.length > 1 ? (
+        {showsVariableFace && cards.length > 1 ? (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
               onClick={() =>
-                setIndex((i) => (i - 1 + codes.length) % codes.length)
+                setIndex((i) => (i - 1 + cards.length) % cards.length)
               }
               aria-label="Previous card"
             >
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             </Button>
             <span className="min-w-[72px] text-center font-mono text-xs tabular-nums text-muted-foreground">
-              {currentIndex + 1} / {codes.length}
+              {currentIndex + 1} / {cards.length}
             </span>
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setIndex((i) => (i + 1) % codes.length)}
+              onClick={() => setIndex((i) => (i + 1) % cards.length)}
               aria-label="Next card"
             >
               <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -123,19 +114,20 @@ export function CardPreview({
               height: CARD_HEIGHT,
             }}
           >
-            {face === 'front' && currentCode ? (
-              <QrCardFront code={currentCode} config={config} />
+            {showsVariableFace ? (
+              <VariableCardFace card={currentCard} config={config} />
             ) : (
-              <QrCardBack config={config} />
+              <SharedCardFace config={config} />
             )}
           </div>
         </div>
       </div>
 
-      {face === 'front' && currentCode ? (
+      {showsVariableFace ? (
         <EmptyContent className="flex flex-col items-center gap-1 text-center">
           <span className="font-mono text-[11px] text-muted-foreground break-all">
-            {currentCode.url}
+            {summary.title}
+            {currentCard.kind === 'voucher' ? ` · ${summary.detail}` : null}
           </span>
         </EmptyContent>
       ) : null}

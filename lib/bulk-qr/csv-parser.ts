@@ -57,6 +57,7 @@ function parseRedeemUrls(
   const skipped = values.length - urls.length
 
   const codes: RedeemCode[] = urls.map((url, index) => ({
+    kind: 'redeem',
     id: `${source}-${index}`,
     url,
     code: extractCode(url),

@@ -3,6 +3,7 @@
 import { Moon, Sun, Grid3x3, Dot, Languages } from 'lucide-react'
 import type { CardConfig, CardTheme, QrStyle } from '@/lib/bulk-qr/types'
 import { CARD_LOCALE_OPTIONS, type CardLocale } from '@/lib/bulk-qr/i18n'
+import { getCardMode } from '@/lib/bulk-qr/modes'
 import {
   Field,
   FieldGroup,
@@ -28,6 +29,8 @@ export function CardCustomizer({
   onChange,
   onEventNameFocus,
 }: CardCustomizerProps) {
+  const mode = getCardMode(config.mode)
+
   return (
     <FieldGroup>
       <Field>
@@ -62,37 +65,39 @@ export function CardCustomizer({
         </ToggleGroup>
       </Field>
 
-      <Field>
-        <FieldLabel htmlFor="qr-style">QR style</FieldLabel>
-        <ToggleGroup
-          id="qr-style"
-          type="single"
-          value={config.qrStyle}
-          onValueChange={(value) => {
-            if (!value) return
-            onChange({ ...config, qrStyle: value as QrStyle })
-          }}
-          variant="outline"
-          className="w-full"
-        >
-          <ToggleGroupItem
-            value="square"
-            aria-label="Pixelated"
-            className="flex-1 gap-2"
+      {config.mode === 'redeem' ? (
+        <Field>
+          <FieldLabel htmlFor="qr-style">QR style</FieldLabel>
+          <ToggleGroup
+            id="qr-style"
+            type="single"
+            value={config.qrStyle}
+            onValueChange={(value) => {
+              if (!value) return
+              onChange({ ...config, qrStyle: value as QrStyle })
+            }}
+            variant="outline"
+            className="w-full"
           >
-            <Grid3x3 className="h-4 w-4" aria-hidden="true" />
-            Pixelated
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="dots"
-            aria-label="Dotted"
-            className="flex-1 gap-2"
-          >
-            <Dot className="h-4 w-4" aria-hidden="true" />
-            Dotted
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </Field>
+            <ToggleGroupItem
+              value="square"
+              aria-label="Pixelated"
+              className="flex-1 gap-2"
+            >
+              <Grid3x3 className="h-4 w-4" aria-hidden="true" />
+              Pixelated
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="dots"
+              aria-label="Dotted"
+              className="flex-1 gap-2"
+            >
+              <Dot className="h-4 w-4" aria-hidden="true" />
+              Dotted
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </Field>
+      ) : null}
 
       <Field>
         <FieldLabel htmlFor="locale">Language</FieldLabel>
@@ -120,7 +125,7 @@ export function CardCustomizer({
           ))}
         </ToggleGroup>
         <FieldDescription>
-          Translates the redeem copy on the front of the card.
+          Translates the copy printed on the cards.
         </FieldDescription>
       </Field>
 
@@ -128,7 +133,7 @@ export function CardCustomizer({
         <FieldLabel htmlFor="event-name">Event or city name</FieldLabel>
         <Input
           id="event-name"
-          placeholder="e.g. Cursor Meetup Lisbon"
+          placeholder={mode.eventPlaceholder}
           maxLength={48}
           value={config.eventName}
           onChange={(event) =>
