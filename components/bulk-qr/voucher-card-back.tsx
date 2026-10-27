@@ -78,6 +78,9 @@ export const VoucherCardBack = forwardRef<HTMLDivElement, VoucherCardBackProps>(
               style={{ color: tokens.mutedForeground }}
             >
               Find out more
+              <span className="block" style={{ color: tokens.foreground }}>
+                raycast.com/new
+              </span>
             </span>
           </div>
         </div>
