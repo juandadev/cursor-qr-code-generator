@@ -69,7 +69,7 @@ export const VoucherCardBack = forwardRef<HTMLDivElement, VoucherCardBackProps>(
             <QrCode
               value={PROMO_URL}
               size={56}
-              style="square"
+              style={config.qrStyle}
               tokens={tokens}
               showLogo={false}
             />

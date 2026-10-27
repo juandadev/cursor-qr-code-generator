@@ -65,39 +65,37 @@ export function CardCustomizer({
         </ToggleGroup>
       </Field>
 
-      {config.mode === 'redeem' ? (
-        <Field>
-          <FieldLabel htmlFor="qr-style">QR style</FieldLabel>
-          <ToggleGroup
-            id="qr-style"
-            type="single"
-            value={config.qrStyle}
-            onValueChange={(value) => {
-              if (!value) return
-              onChange({ ...config, qrStyle: value as QrStyle })
-            }}
-            variant="outline"
-            className="w-full"
+      <Field>
+        <FieldLabel htmlFor="qr-style">QR style</FieldLabel>
+        <ToggleGroup
+          id="qr-style"
+          type="single"
+          value={config.qrStyle}
+          onValueChange={(value) => {
+            if (!value) return
+            onChange({ ...config, qrStyle: value as QrStyle })
+          }}
+          variant="outline"
+          className="w-full"
+        >
+          <ToggleGroupItem
+            value="square"
+            aria-label="Pixelated"
+            className="flex-1 gap-2"
           >
-            <ToggleGroupItem
-              value="square"
-              aria-label="Pixelated"
-              className="flex-1 gap-2"
-            >
-              <Grid3x3 className="h-4 w-4" aria-hidden="true" />
-              Pixelated
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="dots"
-              aria-label="Dotted"
-              className="flex-1 gap-2"
-            >
-              <Dot className="h-4 w-4" aria-hidden="true" />
-              Dotted
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </Field>
-      ) : null}
+            <Grid3x3 className="h-4 w-4" aria-hidden="true" />
+            Pixelated
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="dots"
+            aria-label="Dotted"
+            className="flex-1 gap-2"
+          >
+            <Dot className="h-4 w-4" aria-hidden="true" />
+            Dotted
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </Field>
 
       <Field>
         <FieldLabel htmlFor="locale">Language</FieldLabel>
