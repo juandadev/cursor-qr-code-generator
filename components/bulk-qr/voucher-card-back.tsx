@@ -10,13 +10,15 @@ import { QrCode } from './qr-code'
 const PROMO_URL = 'https://raycast.com/new'
 
 interface VoucherCardBackProps {
-  card: VoucherCard
+  /** Omit to render a blank, write-in voucher used to fill spare PDF slots. */
+  card?: VoucherCard
   config: CardConfig
 }
 
 /**
  * Unique voucher back: states which menu item the card is valid for, plus a
  * per-item serial so every printed voucher can be counted against inventory.
+ * Without a card it renders a blank write-in slot instead of the item name.
  */
 export const VoucherCardBack = forwardRef<HTMLDivElement, VoucherCardBackProps>(
   function VoucherCardBack({ card, config }, ref) {
@@ -45,25 +47,37 @@ export const VoucherCardBack = forwardRef<HTMLDivElement, VoucherCardBackProps>(
               </span>
             ) : null}
           </div>
-          <span
-            className="shrink-0 font-mono text-[7px] tabular-nums tracking-normal"
-            style={{ color: tokens.accent }}
-          >
-            {formatSerial(card.serial, card.itemTotal)}
-          </span>
+          {card ? (
+            <span
+              className="shrink-0 font-mono text-[7px] tabular-nums tracking-normal"
+              style={{ color: tokens.accent }}
+            >
+              {formatSerial(card.serial, card.itemTotal)}
+            </span>
+          ) : null}
         </div>
 
         <div className="flex items-end justify-between gap-3">
-          <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
             <span
               className="text-[8px] font-medium"
               style={{ color: tokens.mutedForeground }}
             >
               {copy.lead}
             </span>
-            <p className="line-clamp-2 text-balance text-[20px] font-semibold leading-[1.1]">
-              {copy.formatItem(card.itemName)}
-            </p>
+            {card ? (
+              <p className="line-clamp-2 text-balance text-[20px] font-semibold leading-[1.1]">
+                {copy.formatItem(card.itemName)}
+              </p>
+            ) : (
+              <div
+                className="h-11 w-full rounded-sm"
+                style={{
+                  backgroundColor:
+                    config.theme === 'dark' ? tokens.foreground : 'transparent',
+                }}
+              />
+            )}
           </div>
           <div className="flex w-14 shrink-0 flex-col items-center gap-1">
             <QrCode

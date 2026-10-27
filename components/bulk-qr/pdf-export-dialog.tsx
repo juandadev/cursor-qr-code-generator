@@ -45,6 +45,8 @@ interface PdfExportDialogProps {
    * only render it once and tile it on a single final page in the PDF.
    */
   getSharedNode: () => HTMLElement | null
+  /** Blank write-in face used to fill spare slots on the last per-card page. */
+  getBlankNode: () => HTMLElement | null
   /** Disables the trigger while other exports are in-flight. */
   externallyDisabled?: boolean
 }
@@ -67,6 +69,7 @@ export function PdfExportDialog({
   config,
   getVariableNode,
   getSharedNode,
+  getBlankNode,
   externallyDisabled,
 }: PdfExportDialogProps) {
   const { variableFace, unit } = getCardMode(config.mode)
@@ -111,10 +114,16 @@ export function PdfExportDialog({
         pixelRatio: PRINT_SCALE,
       })
 
+      const blankNode = getBlankNode()
+      const fillerBlob = blankNode
+        ? await nodeToPngBlob(blankNode, { pixelRatio: PRINT_SCALE })
+        : undefined
+
       const slug = getExportSlug(config)
       const pdfBlob = await generateCardsPdf({
         variable,
         shared: sharedBlob,
+        filler: fillerBlob,
         layout,
         documentTitle: `${slug}-cards`,
       })

@@ -23,6 +23,25 @@ export const VariableCardFace = forwardRef<
   }
 })
 
+interface BlankCardFaceProps {
+  config: CardConfig
+}
+
+/**
+ * Write-in version of the variable face, used to fill spare slots on the last
+ * PDF page. Returns null for modes where a blank card makes no sense.
+ */
+export const BlankCardFace = forwardRef<HTMLDivElement, BlankCardFaceProps>(
+  function BlankCardFace({ config }, ref) {
+    switch (config.mode) {
+      case 'redeem':
+        return null
+      case 'voucher':
+        return <VoucherCardBack ref={ref} config={config} />
+    }
+  },
+)
+
 interface SharedCardFaceProps {
   config: CardConfig
 }

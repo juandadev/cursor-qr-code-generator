@@ -29,6 +29,7 @@ import {
 import { describeCard } from '@/lib/bulk-qr/cards'
 import { getSharedFace } from '@/lib/bulk-qr/modes'
 import type { CardConfig, CardItem } from '@/lib/bulk-qr/types'
+import type { ExportStageHandle } from './export-stage'
 import { PdfExportDialog } from './pdf-export-dialog.lazy'
 
 interface DownloadActionsProps {
@@ -38,8 +39,9 @@ interface DownloadActionsProps {
    * Returns the per-card face element for the given card id. The element
    * must be currently mounted and visible for html-to-image to capture it.
    */
-  getVariableNode: (cardId: string) => HTMLElement | null
-  getSharedNode: () => HTMLElement | null
+  getVariableNode: ExportStageHandle['getVariableNode']
+  getSharedNode: ExportStageHandle['getSharedNode']
+  getBlankNode: ExportStageHandle['getBlankNode']
 }
 
 type Status =
@@ -52,6 +54,7 @@ export function DownloadActions({
   config,
   getVariableNode,
   getSharedNode,
+  getBlankNode,
 }: DownloadActionsProps) {
   const [status, setStatus] = useState<Status>({ kind: 'idle' })
   const sharedFace = getSharedFace(config.mode)
@@ -156,6 +159,7 @@ export function DownloadActions({
           config={config}
           getVariableNode={getVariableNode}
           getSharedNode={getSharedNode}
+          getBlankNode={getBlankNode}
           externallyDisabled={isWorking}
         />
       </div>

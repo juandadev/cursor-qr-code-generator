@@ -1,12 +1,14 @@
 'use client'
 
 import { forwardRef, useImperativeHandle, useRef } from 'react'
-import { SharedCardFace, VariableCardFace } from './card-face'
+import { BlankCardFace, SharedCardFace, VariableCardFace } from './card-face'
 import type { CardConfig, CardItem } from '@/lib/bulk-qr/types'
 
 export interface ExportStageHandle {
   getVariableNode: (cardId: string) => HTMLElement | null
   getSharedNode: () => HTMLElement | null
+  /** Write-in variable face for spare PDF slots; null when the mode has none. */
+  getBlankNode: () => HTMLElement | null
 }
 
 interface ExportStageProps {
@@ -23,6 +25,7 @@ export const ExportStage = forwardRef<ExportStageHandle, ExportStageProps>(
   function ExportStage({ cards, config }, ref) {
     const variableRefs = useRef<Map<string, HTMLDivElement | null>>(new Map())
     const sharedRef = useRef<HTMLDivElement | null>(null)
+    const blankRef = useRef<HTMLDivElement | null>(null)
 
     useImperativeHandle(
       ref,
@@ -30,6 +33,7 @@ export const ExportStage = forwardRef<ExportStageHandle, ExportStageProps>(
         getVariableNode: (cardId: string) =>
           variableRefs.current.get(cardId) ?? null,
         getSharedNode: () => sharedRef.current,
+        getBlankNode: () => blankRef.current,
       }),
       [],
     )
@@ -56,6 +60,7 @@ export const ExportStage = forwardRef<ExportStageHandle, ExportStageProps>(
           />
         ))}
         <SharedCardFace ref={sharedRef} config={config} />
+        <BlankCardFace ref={blankRef} config={config} />
       </div>
     )
   },

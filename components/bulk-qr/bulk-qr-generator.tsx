@@ -107,6 +107,7 @@ export function BulkQrGenerator() {
                 stageRef.current?.getVariableNode(id) ?? null
               }
               getSharedNode={() => stageRef.current?.getSharedNode() ?? null}
+              getBlankNode={() => stageRef.current?.getBlankNode() ?? null}
             />
             {cards.length > 0 ? (
               <p className="text-[11px] text-muted-foreground">

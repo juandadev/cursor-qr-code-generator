@@ -193,6 +193,11 @@ export interface GeneratePdfInput {
    * only need a single PNG and a single page.
    */
   shared?: Blob
+  /**
+   * Optional blank version of the variable face. When provided, it fills the
+   * empty grid slots left on the last variable page so no paper is wasted.
+   */
+  filler?: Blob
   layout: PdfLayout
   /** Optional title written to the PDF's metadata. */
   documentTitle?: string
@@ -207,6 +212,7 @@ export interface GeneratePdfInput {
 export async function generateCardsPdf({
   variable,
   shared,
+  filler,
   layout,
   documentTitle,
   onProgress,
@@ -245,14 +251,18 @@ export async function generateCardsPdf({
 
   // jsPDF wants data URLs for addImage. Convert blobs up front in parallel so
   // the hot loop below only does synchronous drawing work.
-  const [dataUrls, sharedDataUrl] = await Promise.all([
+  const [dataUrls, sharedDataUrl, fillerDataUrl] = await Promise.all([
     Promise.all(variable.map(blobToDataUrl)),
     shared ? blobToDataUrl(shared) : Promise.resolve<string | null>(null),
+    filler ? blobToDataUrl(filler) : Promise.resolve<string | null>(null),
   ])
 
   // Total work units for progress reporting: every variable card + every
   // shared slot drawn on the final page (if a shared face is supplied).
-  const totalWork = dataUrls.length + (sharedDataUrl ? layout.perPage : 0)
+  const variableSlots = fillerDataUrl
+    ? Math.ceil(dataUrls.length / layout.perPage) * layout.perPage
+    : dataUrls.length
+  const totalWork = variableSlots + (sharedDataUrl ? layout.perPage : 0)
   let drawn = 0
   let pageIndex = 0
 
@@ -263,6 +273,9 @@ export async function generateCardsPdf({
     pageIndex += 1
 
     const slice = dataUrls.slice(i, i + layout.perPage)
+    if (fillerDataUrl) {
+      while (slice.length < layout.perPage) slice.push(fillerDataUrl)
+    }
     for (let idx = 0; idx < slice.length; idx += 1) {
       const col = idx % layout.cols
       const row = Math.floor(idx / layout.cols)
